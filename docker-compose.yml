@@ -1,0 +1,170 @@
+version: "3.9"
+
+services:
+  # 🧲 qBittorrent
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+      - WEBUI_PORT=8080
+    volumes:
+      - /data/configs/qbittorrent:/config
+      - /data/torrents:/downloads
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+  # 📺 Jellyfin
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    devices:
+      - /dev/dri:/dev/dri
+    user: 1000:1000
+    group_add:
+      - "993"
+    volumes:
+      - /data/configs/jellyfin:/config
+      - /data/media:/media
+    ports:
+      - "8096:8096"
+    restart: unless-stopped
+
+  # 🎬 Radarr
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - /data/configs/radarr:/config
+      - /data/media/movies:/movies
+      - /data/torrents:/downloads
+      - /data/nzbs:/usenetdownloads
+    ports:
+      - "7878:7878"
+    restart: unless-stopped
+
+  # 📺 Sonarr
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - /data/configs/sonarr:/config
+      - /data/media/tv:/tv
+      - /data/torrents:/downloads
+      - /data/nzbs:/usenetdownloads
+    ports:
+      - "8989:8989"
+    restart: unless-stopped
+
+  # 🔍 Prowlarr
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/Toronto
+    volumes:
+      - /data/configs/prowlarr:/config
+    ports:
+      - "9696:9696"
+    restart: unless-stopped
+
+  # 🧩 Homarr
+  homarr:
+    image: ghcr.io/ajnart/homarr:latest
+    container_name: homarr
+    environment:
+      - TZ=America/Toronto
+    volumes:
+      - /data/configs/homarr:/app/data/configs
+    ports:
+      - "7575:7575"
+    restart: unless-stopped
+
+  # 🙋 Jellyseerr
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=info
+    volumes:
+      - /data/configs/jellyseerr:/app/config
+    ports:
+      - "5055:5055"
+    restart: unless-stopped
+
+  # ⚙️ Portainer
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    volumes:
+      - /data/configs/portainer:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "9000:9000"
+    restart: unless-stopped
+
+  # 🌐 FlareSolverr
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    ports:
+      - "8191:8191"
+    environment:
+      - LOG_LEVEL=info
+    restart: unless-stopped
+
+  # 📨 NZBGet (Usenet Downloader)
+  nzbget:
+    image: linuxserver/nzbget
+    container_name: nzbget
+    ports:
+      - "6789:6789"
+    volumes:
+      - /data/configs/nzbget:/config
+      - /data/nzbs:/usenetdownloads
+    environment:
+      - PUID=1000
+      - PGID=1000
+    restart: unless-stopped
+
+  adguard:
+    image: adguard/adguardhome
+    container_name: adguard
+    ports:
+      - "3000:3000"     # Setup UI
+      - "53:53/tcp"     # DNS
+      - "53:53/udp"     # DNS
+      - "67:67/udp"     # DHCP (optional)
+      - "80:80"         # Optional web UI redirect
+    volumes:
+      - /data/configs/adguard/work:/opt/adguardhome/work
+      - /data/configs/adguard/conf:/opt/adguardhome/conf
+    restart: unless-stopped
+
+
+  cabernet:
+    container_name: cabernet
+    image: ghcr.io/cabernetwork/cabernet:latest
+    ports:
+      - "6077:6077"  # Web UI
+      - "5004:5004"  # Stream port
+    environment:
+      - TZ=America/Toronto
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - /data/configs/cabernet:/app/data
+    restart: unless-stopped
