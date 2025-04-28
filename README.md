@@ -94,6 +94,76 @@ Immich
 
 ---
 
+## 🔥 Full Server Directory Layout
+
+```
+/
+├── home/
+│   └── nayeem/
+│       ├── media-stack/                 # Existing Docker stack for media
+│       └── immich-stack/                # New Docker stack for Immich
+│
+├── data/
+│   ├── media/                           # Movies, TV shows, etc.
+│   │   ├── movies/
+│   │   └── tv/
+│   ├── torrents/                        # Torrent data
+│   ├── nzbs/                            # Usenet NZB downloads
+│   ├── configs/                         # Docker container configs
+│   └── immich/
+│       └── photos/                      # Original photo uploads (HDD)
+│
+├── mnt/ssd/
+│   ├── torrents/                        # High I/O torrent temp folder
+│   ├── nzbs/                            # High I/O NZB temp folder
+│   ├── configs/                         # High priority configs (optional)
+│   ├── transcodes/                      # Jellyfin transcodes
+│   └── immich/
+│       ├── cache/                       # Immich cache (resized images, AI metadata)
+│       ├── thumbs/                      # Immich UI thumbnails
+│       ├── pgdata/                      # PostgreSQL DB for Immich
+│       └── redis/                       # Redis cache for Immich
+│
+├── etc/
+│   ├── tailscale/                       # Tailscale config
+│   └── systemd/system/                  # Custom services
+│
+├── var/lib/docker/                      # Docker storage
+└── ...
+```
+
+---
+
+## 🔧 Ansible Structure
+
+```
+/home/NEW_USERNAME/
+├── ansible/
+│   ├── inventory/
+│   │   └── dev.ini
+│   ├── group_vars/
+│   │   └── dev.yml
+│   └── playbooks/
+│       ├── setup-dev-environment.yml
+│       └── deploy-dev.yml
+├── media-stack-dev/
+│   └── docker-compose.yml
+├── data-dev/
+│   ├── configs/
+│   ├── media/
+│   └── torrents/
+```
+
+- Central control with Ansible + GitHub Actions via:
+
+```
+~/homelab-dev-automation/
+├── ansible/
+├── media-stack-dev/
+```
+
+---
+
 ## ⚙️ Deployment Highlights
 
 - Fully containerized using **Docker Compose**.
@@ -108,31 +178,16 @@ Immich
 
 ---
 
-## 📁 Directory Layout
+## 📁 Directory Layout (Summarized)
 
 ```
 /data/
 ├── configs/
-│   ├── jellyfin/
-│   ├── radarr/
-│   ├── sonarr/
-│   ├── prowarr/
-│   ├── qbittorrent/
-│   ├── immich/
-│   └── other service configs...
 ├── media/
-│   ├── movies/
-│   ├── tv/
-│   └── photos/   # Immich storage
 ├── torrents/
-│   ├── movies/
-│   └── tv/
 ├── nzbs/
-│   ├── movies/
-│   └── tv/
+├── immich/
 ├── backups/
-│   ├── media_backups/
-│   └── config_backups/
 ```
 
 ---
