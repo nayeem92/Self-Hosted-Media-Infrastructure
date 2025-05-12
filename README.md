@@ -70,20 +70,7 @@ This project is fully automated using **Ansible** and **GitHub Actions**:
 
 ## 🔁 Automation Flow
 
-```
-Jellyseerr
-   │
-   ├──► Radarr / Sonarr ───► qBittorrent / NZBGet
-   │                             │
-   └─────────────────────────────┘
-        Hardlink import to Jellyfin
-            │
-        Stream with full metadata
-
-Immich
-   │
-   └──► Auto backup photos/videos to SSD storage
-```
+![Automation-Flow](screenshots/graph.png)
 
 - Requests are made via **Jellyseerr**.
 - **Sonarr/Radarr** fetch via torrent or Usenet (qBittorrent/NZBGet).
