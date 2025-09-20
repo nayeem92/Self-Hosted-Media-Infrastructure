@@ -112,18 +112,37 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
 ---
 ## **Screenshots**
 
-### Media & Service UIs
-
+### Proxmox
 ![Proxmox](screenshots/proxmox.PNG)
+
+### Portainer
 ![Portainer](screenshots/portainer.PNG)
+
+### AdGuard Home
 ![AdGuard Home](screenshots/adguard.PNG)
+
+### Code-Server
 ![Code-Server](screenshots/coder.PNG)
+
+### Filebrowser
 ![Filebrowser](screenshots/filebrowser.PNG)
+
+### Grafana
 ![Grafana](screenshots/grafana.PNG)
+
+### Homarr Dashboard
 ![Homarr Dashboard](screenshots/homarr.PNG)
+
+### Immich
 ![Immich](screenshots/immich.PNG)
+
+### Jellyfin
 ![Jellyfin](screenshots/jellyfin.PNG)
+
+### Linkwarden
 ![Linkwarden](screenshots/linkwarden.PNG)
+
+### Paperless-NGX
 ![Paperless-NGX](screenshots/paperless.PNG)
 
 
