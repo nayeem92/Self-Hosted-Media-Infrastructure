@@ -1,228 +1,116 @@
-# 🧠 Self-Hosted Media Infrastructure (Docker Stack)
+# 🖥️ Nayeem's Homelab
 
-A fully automated, modular home media server deployed on Ubuntu 24.04 using Docker Compose, Ansible, and GitHub Actions.  
-Features include torrent and Usenet automation, photo backup with Immich, IPTV streaming with EPG, secure remote access via Tailscale, containerized orchestration with best DevOps practices, and full monitoring with Prometheus/Grafana.
-
----
-
-## 📃 Infrastructure as Code & Deployment Automation
-
-This project is fully automated using **Ansible** and **GitHub Actions**:
-
-- **Ansible Playbooks**: Manage the server setup, Docker Compose deployments, and configuration updates.
-- **GitHub Actions Workflows**: Automatically trigger Ansible playbooks to redeploy the stack securely over **Tailscale VPN** when changes are pushed.
-
-### 🔹 How It Works
-
-1. **Ansible Folder Structure**: All provisioning and deployment logic is stored under `/ansible`.
-2. **Edit or Add New Services**: Modify or add a new service under `ansible/playbooks/` or `ansible/roles/`.
-3. **Git Push**: When you push to the `main` branch, GitHub Actions triggers an SSH session over Tailscale to the server.
-4. **Auto-Deployment**: The updated Ansible playbook automatically runs and applies changes to the live Docker Compose stack.
-
-> **No manual SSH or docker commands needed. Full GitOps-style automation.**
+Welcome to my homelab documentation! This setup serves as both a practical IT/DevOps playground and a research-oriented environment. It highlights my hands-on experience with virtualization, containerization, network mesh VPNs, monitoring, and automation—skills that are immediately transferable to industry roles or academic projects.
 
 ---
 
-## 📦 Stack Overview
+## **Proxmox Virtualization Overview**
 
-| Service           | Purpose                                           |
-|-------------------|---------------------------------------------------|
-| **Jellyfin**       | Media playback & streaming platform              |
-| **Sonarr**         | TV series automation (torrent & Usenet)           |
-| **Radarr**         | Movie automation (torrent & Usenet)               |
-| **qBittorrent**    | Torrent client with automation integration       |
-| **NZBGet**         | Usenet downloader for high-speed automation      |
-| **Prowlarr**       | Indexer manager for Sonarr/Radarr                |
-| **Jellyseerr**     | User request interface for Jellyfin              |
-| **Cabernet**       | IPTV integration proxy with XMLTV EPG support    |
-| **AdGuard Home**   | DNS-level ad blocker (network-wide filtering)    |
-| **Homarr**         | Elegant dashboard UI to manage all services      |
-| **Portainer**      | Docker container manager with GUI                |
-| **FlareSolverr**   | Cloudflare bypass support for indexers           |
-| **Prometheus**     | Metrics collection and alerting                 |
-| **Grafana**        | Visualization of system and service metrics     |
-| **Node Exporter**  | Host system metrics (CPU, RAM, Disk usage)       |
-| **cAdvisor**       | Container-level resource monitoring             |
-| **Immich**         | Self-hosted photo and video backup solution      |
+| VMID | Name           | Type | Purpose / Key Services |
+|------|---------------|------|-----------------------|
+| 100  | media-server   | LXC  | Primary Docker stack: Media servers (Jellyfin, Sonarr, Radarr), Automation (Bazarr, Prowlarr), Monitoring (Prometheus, Grafana, cAdvisor), Networking (AdGuard), Immich server (photo backup + ML) |
+| 102  | portainer      | LXC  | Portainer UI for Docker management across all nodes |
+| 103  | vaultwarden    | LXC  | Vaultwarden (password manager) with Portainer Agent for orchestration |
+| 104  | dashboard      | LXC  | Homarr dashboard, Glance status board, Portainer Agent |
+| 105  | coder          | LXC  | Code-Server (VSCode in browser), Linkwarden stack (Postgres + Meilisearch), Portainer Agent |
+| 106  | paperless      | LXC  | Paperless-NGX document management (Postgres, Redis, Gotenberg, Tika), Portainer Agent |
+| 101  | RHCSA VM       | VM   | RHEL 9.6 – RHCSA practice environment with snapshot management |
+
+**Notes:**
+- All LXC containers and VM101 run **Tailscale**, providing a secure mesh VPN.
+- Portainer Agent is deployed on all LXC nodes for centralized Docker orchestration and monitoring.
+- A free **Oracle VPS** is integrated into the Tailscale mesh for reverse proxy experimentation using **Caddy**.
 
 ---
 
-## 🔐 Access & Networking
+## **Docker Service Overview**
 
-- **Tailscale Mesh VPN**: Secures remote access without port forwarding.
-- **Services exposed**:
-  - Jellyfin: `8096`
-  - Sonarr: `8989`
-  - Radarr: `7878`
-  - qBittorrent: `8080`
-  - NZBGet: `6789`
-  - Prowlarr: `9696`
-  - Jellyseerr: `5055`
-  - AdGuard Home: `3000`
-  - Homarr: `7575`
-  - Cabernet: `6077`
-  - Portainer: `9000`
-  - Prometheus: `9090`
-  - Grafana: `3001`
-  - Immich: `2283`
+### **Media-Server (LXC 100)**
 
----
-
-## 🔁 Automation Flow
-
-![Automation-Flow](screenshots/graph.png)
-
-- Requests are made via **Jellyseerr**.
-- **Sonarr/Radarr** fetch via torrent or Usenet (qBittorrent/NZBGet).
-- Completed downloads are **hardlinked** into `/data/media`.
-- Jellyfin automatically picks up and displays new media.
-- **Immich** automatically backs up and organizes all photos and videos securely.
-- **Prometheus + Grafana** monitor server health and service metrics in real-time.
+| Service | Image | Ports | Notes |
+|---------|-------|-------|-------|
+| Portainer Agent | `portainer/agent:2.33.1` | 9001/tcp | Manages Docker nodes |
+| Cabernet | `ghcr.io/cabernetwork/cabernet:latest` | 5004/tcp, 6077/tcp | Streaming & caching service |
+| qBittorrent | `lscr.io/linuxserver/qbittorrent` | 8080/tcp, 6881/tcp & udp | Torrent client |
+| Prowlarr | `lscr.io/linuxserver/prowlarr` | 9696/tcp | Indexer manager |
+| Sonarr | `lscr.io/linuxserver/sonarr` | 8989/tcp | TV automation |
+| Filebrowser | `hurlenko/filebrowser` | 8081->8080/tcp | Web-based file manager |
+| Bazarr | `lscr.io/linuxserver/bazarr` | 6767/tcp | Subtitles manager |
+| Prometheus | `prom/prometheus:latest` | 9090/tcp | Monitoring and metrics |
+| Grafana | `grafana/grafana-oss:latest` | 3001->3000/tcp | Visualization and dashboards |
+| Radarr | `lscr.io/linuxserver/radarr` | 7878/tcp | Movie automation |
+| Node Exporter | `prom/node-exporter:latest` | 9100/tcp | Node-level metrics |
+| Jellyfin | `jellyfin/jellyfin:latest` | 8096/tcp | Media server |
+| AdGuard Home | `adguard/adguardhome` | 53/udp/tcp, 80/443/tcp, 67/udp, 853/tcp/udp, 3000/5443 | Network-wide ad-blocking and DNS |
+| NZBGet | `linuxserver/nzbget` | 6789/tcp | Usenet downloader |
+| cAdvisor | `gcr.io/cadvisor/cadvisor:latest` | 8082->8080/tcp | Container metrics |
+| Flaresolverr | `ghcr.io/flaresolverr/flaresolverr:latest` | - | Web scraper (currently restarting) |
+| Jellyseerr | `fallenbagel/jellyseerr:latest` | 5055/tcp | Media request manager |
+| Immich Server & ML | `ghcr.io/immich-app` | 2283/tcp | Photo backup & ML processing |
+| Immich Postgres | `tensorchord/pgvecto-rs:pg14-v0.2.0` | 5432/tcp | Database |
+| Immich Redis | `valkey/valkey:8-bookworm` | 6379/tcp | Cache |
 
 ---
 
-## 🔥 Full Server Directory Layout
-
-```
-/
-├── home/
-│   └── nayeem/
-│       ├── media-stack/                 # Existing Docker stack for media
-│       └── immich-stack/                # New Docker stack for Immich
-│
-├── data/
-│   ├── media/                           # Movies, TV shows, etc.
-│   │   ├── movies/
-│   │   └── tv/
-│   ├── torrents/                        # Torrent data
-│   ├── nzbs/                            # Usenet NZB downloads
-│   ├── configs/                         # Docker container configs
-│   └── immich/
-│       └── photos/                      # Original photo uploads (HDD)
-│
-├── mnt/ssd/
-│   ├── torrents/                        # High I/O torrent temp folder
-│   ├── nzbs/                            # High I/O NZB temp folder
-│   ├── configs/                         # High priority configs (optional)
-│   ├── transcodes/                      # Jellyfin transcodes
-│   └── immich/
-│       ├── cache/                       # Immich cache (resized images, AI metadata)
-│       ├── thumbs/                      # Immich UI thumbnails
-│       ├── pgdata/                      # PostgreSQL DB for Immich
-│       └── redis/                       # Redis cache for Immich
-│
-├── etc/
-│   ├── tailscale/                       # Tailscale config
-│   └── systemd/system/                  # Custom services
-│
-├── var/lib/docker/                      # Docker storage
-└── ...
-```
+### **Portainer Node (LXC 102)**
+| Service | Image | Notes |
+|---------|-------|------|
+| Portainer | `portainer/portainer-ce:latest` | Main Docker UI managing all nodes via Portainer Agents |
 
 ---
 
-## 🔧 Ansible Structure
-
-```
-/home/NEW_USERNAME/
-├── ansible/
-│   ├── inventory/
-│   │   └── dev.ini
-│   ├── group_vars/
-│   │   └── dev.yml
-│   └── playbooks/
-│       ├── setup-dev-environment.yml
-│       └── deploy-dev.yml
-├── media-stack-dev/
-│   └── docker-compose.yml
-├── data-dev/
-│   ├── configs/
-│   ├── media/
-│   └── torrents/
-```
-
-- Central control with Ansible + GitHub Actions via:
-
-```
-~/homelab-dev-automation/
-├── ansible/
-├── media-stack-dev/
-```
+### **Vaultwarden Node (LXC 103)**
+| Service | Image | Ports | Notes |
+|---------|-------|-------|-------|
+| Vaultwarden | `vaultwarden/server:latest` | 8080/tcp | Self-hosted password manager |
+| Portainer Agent | `portainer/agent:2.33.1` | 9001/tcp | Node orchestration |
 
 ---
 
-## ⚙️ Deployment Highlights
-
-- Fully containerized using **Docker Compose**.
-- Secure, portless access via **Tailscale VPN**.
-- Full monitoring and alerting with **Prometheus**, **Grafana**, **Node Exporter**, and **cAdvisor**.
-- Configurations version-controlled via **GitHub**.
-- Automated server provisioning and environment setup with **Ansible**.
-- Private **GitHub Actions workflows** auto-deploy latest configurations onto homelab server.
-- Optimized transcoding with **VAAPI** hardware acceleration.
-- Storage optimization separating HDD/SSD workloads.
-- Personal cloud photo storage with **Immich**.
+### **Dashboard Node (LXC 104)**
+| Service | Image | Ports | Notes |
+|---------|-------|-------|-------|
+| Homarr | `ghcr.io/homarr-labs/homarr:latest` | 7575/tcp | Central dashboard for the homelab |
+| Glance | `glanceapp/glance` | 8080/tcp | Status board and monitoring overview |
+| Portainer Agent | `portainer/agent:latest` | 9001/tcp | Node orchestration |
 
 ---
 
-## 📁 Directory Layout (Summarized)
-
-```
-/data/
-├── configs/
-├── media/
-├── torrents/
-├── nzbs/
-├── immich/
-├── backups/
-```
+### **Coder Node (LXC 105)**
+| Service | Image | Ports | Notes |
+|---------|-------|-------|-------|
+| Code-Server | `lscr.io/linuxserver/code-server:latest` | 8443/tcp | Web-based IDE (VSCode) |
+| Linkwarden | `ghcr.io/linkwarden/linkwarden:latest` | 3000/tcp | Self-hosted password manager |
+| Postgres | `postgres:16-alpine` | 5432/tcp | Linkwarden DB |
+| Meilisearch | `getmeili/meilisearch:v1.12.8` | 7700/tcp | Linkwarden search engine |
+| Portainer Agent | `portainer/agent:latest` | 9001/tcp | Node orchestration |
 
 ---
 
-## 🚀 Automation & Monitoring
-
-| Feature                        | Tools Used                           |
-|:--------------------------------|:-------------------------------------|
-| Infrastructure-as-Code         | Ansible, Docker Compose              |
-| Remote deploy via CI/CD         | GitHub Actions, Tailscale SSH         |
-| System and container monitoring | Prometheus, Grafana, Node Exporter, cAdvisor |
-| Storage optimization            | SSD for downloads/transcodes, HDD for long-term storage |
-| Media acquisition automation    | Jellyseerr, Sonarr, Radarr, Prowlarr |
-| IPTV with full EPG              | Cabernet + EPGShare XMLTV sources     |
-| VPN Mesh                        | Tailscale                            |
-| Personal Photo Cloud            | Immich                               |
+### **Paperless Node (LXC 106)**
+| Service | Image | Ports | Notes |
+|---------|-------|-------|-------|
+| Paperless-NGX | `ghcr.io/paperless-ngx/paperless-ngx:latest` | 8000/tcp | Document management system |
+| Redis | `redis:8` | 6379/tcp | Broker for Paperless |
+| Gotenberg | `gotenberg/gotenberg:8.22` | 3000/tcp | PDF processing service |
+| Tika | `apache/tika:latest` | 9998/tcp | OCR / text extraction |
+| Postgres | `postgres:17` | 5432/tcp | Database for Paperless |
+| Portainer Agent | `portainer/agent:latest` | 9001/tcp | Node orchestration |
 
 ---
 
-## 🧐 Skills Demonstrated
-
-- Docker Compose orchestration, volume and network management
-- Infrastructure automation with Ansible playbooks
-- CI/CD pipeline creation with GitHub Actions and Tailscale
-- Full-stack observability design with Prometheus and Grafana
-- Media pipeline optimization using hardlinking and SSD/HDD separation
-- Advanced remote access security with Tailscale Mesh VPN
-- Self-hosted IPTV integration with custom XMLTV EPG feeds
-- Personal cloud photo management with Immich
-- Systemd integration and runtime service optimization
+## **Networking & Connectivity**
+- All nodes connected via **Tailscale mesh VPN** for secure internal networking.
+- **Oracle VPS** integrated in Tailscale mesh for **reverse proxy testing** using **Caddy**.
+- Exposed services are mapped to host ports for selective external access.
+- Demonstrates expertise in:
+  - Container orchestration and monitoring
+  - VPN mesh networking
+  - Self-hosted service deployment
+  - Infrastructure automation and observability
 
 ---
 
-## 📸 Screenshots
 
-> _Example Screenshots:_
 
-![Jellyfin Dashboard](screenshots/Capture1.PNG)
-![Grafana Metrics](screenshots/Capture2.PNG)
-![Homarr Overview](screenshots/Capture3.PNG)
-![Sonarr Queue](screenshots/Capture4.PNG)
-![Radarr Queue](screenshots/Capture5.PNG)
-![Prometheus Targets](screenshots/Capture6.PNG)
-![AdGuard Home Stats](screenshots/Capture7.PNG)
-![Portainer Container Management](screenshots/Capture8.PNG)
-
----
-
-## 🧾 License
-
-MIT License — feel free to fork, modify, and enhance your own self-hosted infrastructure.
+*📌 Note:* All services are actively maintained, monitored, and secured, with emphasis on reproducibility, scaling, and experimentation.
