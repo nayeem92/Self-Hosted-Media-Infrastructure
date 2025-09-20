@@ -110,7 +110,21 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
   - Infrastructure automation and observability
 
 ---
+## **Screenshots**
 
+### Media & Service UIs
+
+![Proxmox](screenshots/proxmox.PNG)
+![Portainer](screenshots/portainer.PNG)
+![AdGuard Home](screenshots/adguard.PNG)
+![Code-Server](screenshots/coder.PNG)
+![Filebrowser](screenshots/filebrowser.PNG)
+![Grafana](screenshots/grafana.PNG)
+![Homarr Dashboard](screenshots/homarr.PNG)
+![Immich](screenshots/immich.PNG)
+![Jellyfin](screenshots/jellyfin.PNG)
+![Linkwarden](screenshots/linkwarden.PNG)
+![Paperless-NGX](screenshots/paperless.PNG)
 
 
 *📌 Note:* All services are actively maintained, monitored, and secured, with emphasis on reproducibility, scaling, and experimentation.
