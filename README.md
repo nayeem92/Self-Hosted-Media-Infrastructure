@@ -44,7 +44,7 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
 | AdGuard Home | `adguard/adguardhome` | 53/udp/tcp, 80/443/tcp, 67/udp, 853/tcp/udp, 3000/5443 | Network-wide ad-blocking and DNS |
 | NZBGet | `linuxserver/nzbget` | 6789/tcp | Usenet downloader |
 | cAdvisor | `gcr.io/cadvisor/cadvisor:latest` | 8082->8080/tcp | Container metrics |
-| Flaresolverr | `ghcr.io/flaresolverr/flaresolverr:latest` | - | Web scraper (currently restarting) |
+| Flaresolverr | `ghcr.io/flaresolverr/flaresolverr:latest` | - | Web scraper |
 | Jellyseerr | `fallenbagel/jellyseerr:latest` | 5055/tcp | Media request manager |
 | Immich Server & ML | `ghcr.io/immich-app` | 2283/tcp | Photo backup & ML processing |
 | Immich Postgres | `tensorchord/pgvecto-rs:pg14-v0.2.0` | 5432/tcp | Database |
@@ -114,3 +114,4 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
 
 
 *📌 Note:* All services are actively maintained, monitored, and secured, with emphasis on reproducibility, scaling, and experimentation.
+
