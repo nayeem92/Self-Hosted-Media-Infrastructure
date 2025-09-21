@@ -9,6 +9,10 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
 ![Homelab Diagram](screenshots/diagram.png)
 
 ---
+### **Homelab Services Name**
+![Homelab Diagram 2](screenshots/services.png)
+
+---
 ## **Proxmox Virtualization Overview**
 
 | VMID | Name           | Type | Purpose / Key Services |
