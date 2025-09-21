@@ -4,6 +4,11 @@ Welcome to my homelab documentation! This setup serves as both a practical IT/De
 
 ---
 
+## **Homelab Architecture Diagram**
+
+![Homelab Diagram](screenshots/diagram.png)
+
+---
 ## **Proxmox Virtualization Overview**
 
 | VMID | Name           | Type | Purpose / Key Services |
